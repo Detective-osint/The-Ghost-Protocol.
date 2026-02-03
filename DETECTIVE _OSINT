@@ -1,0 +1,43 @@
+import face_recognition
+import os
+
+def ghost_investigation():
+    print("--- 🌑 Ghost OSINT Scanner Loaded ---")
+    try:
+        # Load the target's biometric fingerprint
+        target_img = face_recognition.load_image_file("target.jpg")
+        target_encoding = face_recognition.face_encodings(target_img)[0]
+        
+        found_any = False
+        folder = "find_me"
+        
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            print(f"[*] Folder '{folder}' created. Add images there.")
+            return
+
+        print(f"[*] Scanning images in '{folder}'...")
+        
+        for file in os.listdir(folder):
+            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                path = os.path.join(folder, file)
+                try:
+                    img = face_recognition.load_image_file(path)
+                    encs = face_recognition.face_encodings(img)
+                    
+                    if len(encs) > 0:
+                        match = face_recognition.compare_faces([target_encoding], encs[0])
+                        if match[0]:
+                            print(f"🚨 [ALERT]: Match found in {file}!")
+                            found_any = True
+                except:
+                    continue
+        
+        if not found_any:
+            print("[-] Scan complete. No matches found.")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    ghost_investigation()
